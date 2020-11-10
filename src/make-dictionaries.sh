@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20200924"
+UTDICDATE="20201110"
 REVISION="1"
 
 #altcannadic="true"
@@ -73,8 +73,8 @@ cd ../zipcode/
 ruby fix-ken_all.rb
 ruby generate-chimei.rb
 cat mozcdic-chimei.txt >> ../src/mozcdic-ut.txt
-ruby generate-zipcode-jigyosyo.rb
-ruby generate-zipcode-ken_all.rb
+#ruby generate-zipcode-jigyosyo.rb
+#ruby generate-zipcode-ken_all.rb
 
 cd ../src/
 
@@ -88,8 +88,8 @@ ruby apply-jawiki-costs.rb mozcdic-ut.txt.extracted
 
 rm -f ../mozcdic*-ut-*.txt
 mv mozcdic-ut.txt.extracted ../mozcdic-ut-$UTDICDATE.$REVISION.txt
-cat ../zipcode/mozcdic-zipcode-jigyosyo.txt ../zipcode/mozcdic-zipcode-ken_all.txt \
-> ../mozcdic-zipcode-ut-$UTDICDATE.$REVISION.txt
+#cat ../zipcode/mozcdic-zipcode-jigyosyo.txt ../zipcode/mozcdic-zipcode-ken_all.txt \
+#> ../mozcdic-zipcode-ut-$UTDICDATE.$REVISION.txt
 
 
 # ==============================================================================

@@ -2,6 +2,12 @@
 # mozcdic-ut
 # ==============================================================================
 
+2020-11-10
+- update jawiki-articles and jinmei-ut.
+- comment out my zipcode dictionary.
+  use official mozc's zipcode dictionary.
+- update build scripts.
+
 2020-09-24
 - update neologd, jawiki-articles and jinmei-ut.
 

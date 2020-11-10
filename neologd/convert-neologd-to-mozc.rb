@@ -10,35 +10,11 @@ require 'nkf'
 
 def convert_neologd_to_mozc
 	file = File.new("../mozc/id.def", "r")
-		iddef = file.read.split("\n")
+		id = file.read.split("\n")
 	file.close
 
-	id = []
-
-	# "名詞,一般,*,*,*,*,*" と "名詞,固有名詞," を収録する
-	id = iddef.grep(/\ 名詞,一般,\*,\*,\*,\*,\*/)
-	id = id +  iddef.grep(/\ 名詞,固有名詞,/)
-	# 固有名詞から地名を除外。地名は郵便番号データから生成する
-	id = id.reject{|s| s.index("地域") != nil}
-
-	id_num = []
-	id_hinsi = []
-	c = 0
-
-	id.length.times do |i|
-		# 1847 名詞,一般,*,*,*,*,*
-		s = id[i].split(" ")
-		id_num[c] = s[0]
-		# neologdの品詞はmozcの品詞より「,*」が1つ少ない
-		id_hinsi[c] = s[1][0..-3]
-		c = c + 1
-	end
-
-	# 人名のIDは "名詞,一般,*,*,*,*,*" にする。
-	# "名詞,固有名詞,人名,一般,*,*" は優先度が低く、
-	# "名詞,固有名詞,一般,*,*,*" の「明石屋さんま」が優先されてしまう。
-	# "名詞,固有名詞,一般,*,*,*" にするのは避ける。フィルタリング対象なので
-	id_num[id_hinsi.index("名詞,固有名詞,人名,一般,*,*")] = id_num[id_hinsi.index("名詞,一般,*,*,*,*")]
+	id = id.grep(/\ 名詞,固有名詞,一般,\*,\*,\*,\*/)
+	id = id[0].split(" ")[0]
 
 	# mecab-user-dict-seedを読み込む
 	file = File.new($filename, "r")
@@ -57,21 +33,28 @@ def convert_neologd_to_mozc
 		s = lines[i].split(",")
 		yomi = s[-2]
 		hyouki = s[0]
-		hinsi = s[4..9].join(",")
 
-		# 収録対象外の品詞はスキップ
-		c = id_hinsi.index(hinsi)
-
-		if c == nil
-			next
-		end
-
-		id = id_num[c]
-
+		# 名詞以外は除外
+		if s[4] != "名詞" ||
+		# 地域名を除外。地域名は郵便番号辞書から生成する
+		s[6] == "地域" ||
+		# 下の名前を除外
+		s[7] == "名" ||
+		# 読みが2文字以下のものを除外
+		yomi.length < 3 ||
+		# 1文字の表記を除外
+		hyouki.length < 2 ||
+		# 表記が20文字を超える場合は除外
+		hyouki.length > 20 ||
+		# 英数字のみの表記を除外
+		hyouki.length == hyouki.bytesize ||
+		# 数字を2個以上含む表記を除外
+		# 「712円」「第1231話」などキリがないので
+		hyouki.scan(/\d/).length > 1 ||
 		# 表記と原形が一致しないエントリを除外。無駄な候補が増えるので
-		# 電車でGO!FINAL,1288,1288,4700,名詞,固有名詞,一般,*,*,*,\
-		# 電車でGO! FINAL,デンシャデゴーファイナル,デンシャデゴーファイナル
-		if hyouki != s[-3]
+		hyouki != s[-3] ||
+		# 頻出表現をもじった表記を除外（一花カナウ いつかかなう）
+		hyouki == "一花カナウ"
 			next
 		end
 
@@ -79,20 +62,6 @@ def convert_neologd_to_mozc
 		hyouki = hyouki.gsub("，", ", ")
 		if hyouki[-1] == " "
 			hyouki = hyouki[0..-2]
-		end
-
-		# 表記が20文字を超える場合は除外
-		if hyouki.length > 20 ||
-		# 英数字のみの表記を除外
-		hyouki.length == hyouki.bytesize ||
-		# 1文字の表記を除外
-		hyouki.length < 2 ||
-		# 数字を3個以上含む表記を除外
-		# 「712円」「第1231話」などキリがないので
-		hyouki.scan(/\d/).length > 2 ||
-		# 頻出表現をもじった表記を除外（一花カナウ いつかかなう）
-		hyouki == "一花カナウ"
-			next
 		end
 
 		hyoukitmp = hyouki.tr("・=", "")
