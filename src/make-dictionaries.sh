@@ -3,13 +3,13 @@
 UTDICDATE="20201110"
 REVISION="1"
 
-#altcannadic="true"
-#edict="true"
+altcannadic="true"
+edict="true"
 jawikiarticles="true"
 jinmeiut="true"
 neologd="true"
-#nicoime="true"
-#skk="true"
+nicoime="true"
+skk="true"
 
 
 # ==============================================================================
