@@ -7,33 +7,33 @@
 
 ## AUR
 
-[mozc-ut-unified](https://aur.archlinux.org/packages/mozc-ut-unified/)
+[mozc-ut-unified-full](https://aur.archlinux.org/packages/mozc-ut-unified-full/)
 
 ## How to install
 
 Use trizen.
 
 ```bash
-trizen -S mozc-ut-unified
+trizen -S mozc-ut-unified-full
 ```
 
 yay.
 
 ```bash
-yay -S mozc-ut-unified
+yay -S mozc-ut-unified-full
 ```
 
 pamac.
 
 ```bash
-pamac install mozc-ut-unified
+pamac install mozc-ut-unified-full
 ```
 
 or manually
 
 ```
-git clone https://aur.archlinux.org/mozc-ut-unified.git
-cd mozc-ut-unified
+git clone https://aur.archlinux.org/mozc-ut-unified-full.git
+cd mozc-ut-unified-full
 makepkg
 sudo pacman -U *.pkg.tar.xz
 ```
