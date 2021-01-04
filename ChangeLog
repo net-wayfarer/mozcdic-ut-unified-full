@@ -2,6 +2,14 @@
 # mozcdic-ut
 # ==============================================================================
 
+2020-12-29
+- update jawiki-articles (20201221).
+- update jinmei-ut.
+- update README (change Mozc URL).
+- test with ruby 3.0.0p0.
+- I uploaded fcitx5-mozc-ut-*.PKGBUILD.
+  https://osdn.net/users/utuhiro/pf/utuhiro/files/
+
 2020-11-29
 - update jawiki-articles (20201121).
 - update jinmei-ut.
