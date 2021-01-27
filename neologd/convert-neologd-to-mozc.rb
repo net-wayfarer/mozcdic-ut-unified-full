@@ -52,9 +52,7 @@ def convert_neologd_to_mozc
 		# 「712円」「第1231話」などキリがないので
 		hyouki.scan(/\d/).length > 1 ||
 		# 表記と原形が一致しないエントリを除外。無駄な候補が増えるので
-		hyouki != s[-3] ||
-		# 頻出表現をもじった表記を除外（一花カナウ いつかかなう）
-		hyouki == "一花カナウ"
+		hyouki != s[-3]
 			next
 		end
 

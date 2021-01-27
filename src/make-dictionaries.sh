@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20201229"
+UTDICDATE="20210123"
 REVISION="1"
 
 altcannadic="true"
