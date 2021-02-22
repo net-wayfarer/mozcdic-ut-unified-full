@@ -73,7 +73,7 @@ end
 # main
 # ==============================================================================
 
-`wget -N http://openlab.jp/skk/dic/SKK-JISYO.L.gz`
+`wget -nc http://openlab.jp/skk/dic/SKK-JISYO.L.gz`
 `rm -f SKK-JISYO.L`
 `gzip -dk SKK-JISYO.L.gz`
 $filename = "SKK-JISYO.L"

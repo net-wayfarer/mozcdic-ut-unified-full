@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20210123"
+UTDICDATE="20210222"
 REVISION="1"
 
 altcannadic="true"
@@ -10,6 +10,7 @@ jinmeiut="true"
 neologd="true"
 nicoime="true"
 skk="true"
+sudachidict="true"
 
 
 # ==============================================================================
@@ -17,6 +18,9 @@ skk="true"
 # ==============================================================================
 
 rm -f mozcdic-ut.txt
+#rm ../*/*.zip
+#rm ../*/*.gz
+#rm ../*/*.bz2
 
 cd ../mozc/
 sh get-official-mozc.sh
@@ -69,12 +73,17 @@ ruby modify-skkdic.rb
 cat mozcdic-skkdic.txt >> ../src/mozcdic-ut.txt
 fi
 
+if [ $sudachidict = true ]; then
+cd ../sudachidict/
+ruby convert-sudachiduct-to-mozc.rb
+ruby ../src/filter-entries.rb mozcdic-sudachidict-*.txt
+cat mozcdic-sudachidict-*.txt >> ../src/mozcdic-ut.txt
+fi
+
 cd ../zipcode/
 ruby fix-ken_all.rb
 ruby generate-chimei.rb
 cat mozcdic-chimei.txt >> ../src/mozcdic-ut.txt
-#ruby generate-zipcode-jigyosyo.rb
-#ruby generate-zipcode-ken_all.rb
 
 cd ../src/
 
@@ -88,8 +97,6 @@ ruby apply-jawiki-costs.rb mozcdic-ut.txt.extracted
 
 rm -f ../mozcdic*-ut-*.txt
 mv mozcdic-ut.txt.extracted ../mozcdic-ut-$UTDICDATE.$REVISION.txt
-#cat ../zipcode/mozcdic-zipcode-jigyosyo.txt ../zipcode/mozcdic-zipcode-ken_all.txt \
-#> ../mozcdic-zipcode-ut-$UTDICDATE.$REVISION.txt
 
 
 # ==============================================================================

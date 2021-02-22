@@ -70,11 +70,10 @@ end
 # ==============================================================================
 
 `rm -f KEN_ALL.CSV`
-`wget -N http://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip`
+`wget -nc https://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip`
 `unzip ken_all.zip`
 $filename = "KEN_ALL.CSV"
 $dicname = "KEN_ALL.CSV.fixed"
 fix_ken_all
 
 `rm -f KEN_ALL.CSV`
-

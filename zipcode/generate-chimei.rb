@@ -134,4 +134,3 @@ end
 $filename = "KEN_ALL.CSV.fixed"
 $dicname = "mozcdic-chimei.txt"
 generate_chimei
-

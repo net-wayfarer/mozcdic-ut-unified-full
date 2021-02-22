@@ -2,6 +2,13 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-02-18
+- add sudachidict (disabled).
+- neologd辞書の表記でコストがマイナスのものを追加した。
+- 英数字のみの表記でウィキペディアの見出しにあるものを追加した。
+- update jawiki-articles (20210220).
+- update jinmei-ut.
+
 2021-01-23
 - update jawiki-articles (20210121).
 - update jinmei-ut.

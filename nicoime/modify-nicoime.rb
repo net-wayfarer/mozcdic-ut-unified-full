@@ -85,7 +85,7 @@ end
 # main
 # ==============================================================================
 
-`wget -N http://public.s3.tkido.com.s3-website-ap-northeast-1.amazonaws.com/nicoime.zip`
+`wget -nc http://public.s3.tkido.com.s3-website-ap-northeast-1.amazonaws.com/nicoime.zip`
 `rm -f nicoime_*.txt`
 `7z x nicoime.zip`
 $filename = "nicoime_msime.txt"

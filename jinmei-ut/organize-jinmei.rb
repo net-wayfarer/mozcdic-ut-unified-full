@@ -47,8 +47,6 @@ def organize_jinmei
 		if hyouki.length > 25 ||
 		# 表記が1文字の場合は除外
 		hyouki.length < 2 ||
-		# 表記が英数字のみの場合は除外
-		hyouki.length == hyouki.bytesize ||
 		# 読みが2文字以下の場合は除外
 		yomi.length < 3 ||
 		# 読みにひらがな以外のものがあれば除外

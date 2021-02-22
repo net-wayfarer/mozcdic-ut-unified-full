@@ -20,38 +20,37 @@ def count_jawiki_titles
 		# 「三浦大知」を前方一致検索できるようにする
 		titles[i] = titles[i].split("_(")[-1]
 
-		# 全角3文字未満の表記はヒットしすぎるのでカウントしない
-		if titles[i].bytesize < 9 ||
-		# 英数字のみの表記はカウントしない
-		titles[i].length == titles[i].bytesize
+		# 3文字未満の表記は多すぎるので除外
+		if titles[i].length < 3
 			titles[i] = nil
+			next
 		end
+
+		# "_" を " " に置き換え
+		# THE_BEATLES
+		titles[i] = titles[i].gsub("_", " ")
 	end
 
 	titles = titles.compact.sort
 
 	dicfile = File.new($dicname, "w")
 
-	titles.length.times do |i|
-		s = titles[i]
-		c = 1
+	t_length = titles.length
 
-		# 10文字以上の表記はヒット数を調べない。人名のコスト調整が主目的なので。
-		# 「明石家さんまのユーロNO.1」のヒット数が
-		# 「明石家さんまのユーロNo.1!」より大きくなると逆に不適切
-		if titles[i].length > 9 ||
-		# 次の表記がnilの場合は書き出して終了
-		titles[i + c] == nil
-			dicfile.puts "jawikititles	0	0	" + c.to_s + "	" + s
+	t_length.times do |i|
+		# 重複エントリをスキップ
+		if titles[i] == titles[i - 1]
 			next
 		end
 
+		c = 1
+
 		# 前方一致する限りカウントし続ける
-		while titles[i + c].index(s) == 0
+		while (i + c) < t_length && titles[i + c].index(titles[i]) == 0
 			c = c + 1
 		end
 
-		dicfile.puts "jawikititles	0	0	" + c.to_s + "	" + s
+		dicfile.puts "jawikititles	0	0	" + c.to_s + "	" + titles[i]
 	end
 
 	dicfile.close
@@ -63,7 +62,7 @@ end
 # ==============================================================================
 
 `rm -f jawiki-latest-all-titles-in-ns0`
-`wget -N https://dumps.wikimedia.org/jawiki/latest/jawiki-latest-all-titles-in-ns0.gz`
+`wget -nc https://dumps.wikimedia.org/jawiki/latest/jawiki-latest-all-titles-in-ns0.gz`
 $filename = "jawiki-latest-all-titles-in-ns0.gz"
 $dicname = "jawiki-latest-all-titles-in-ns0.counts"
 

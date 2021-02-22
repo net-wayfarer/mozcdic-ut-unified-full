@@ -52,23 +52,33 @@ def apply_jawiki_costs
 			next
 		end
 
-		# 中居正広	なかいまさひろ	1917	1917	6477
-		# jawikiの見出し語に1回ヒットする表記はコスト値のベースを7000にする
-		# コスト値 = 7000 + (元のコスト値/10)
-		if s[0] == jawiki[0] && jawiki[4] == 1
-			s[4] = (7000 + (s[4] / 10)).to_s
-			lines[i] = s.join("	")
-		# jawikiの見出し語に2回以上ヒットする表記はコスト値のベースを6000にする
-		# コスト値 = 6000 + (元のコスト値/10) - (ヒット数*30)
-		elsif s[0] == jawiki[0] && jawiki[4] > 1
-			s[4] = (6000 + (s[4] / 10) - (jawiki[4] * 30)).to_s
-			lines[i] = s.join("	")
+		# jawikiの見出し語にヒットしない英数字のみの表記は除外
+		if s[0] != jawiki[0] && s[0].length == s[0].bytesize
+			lines[i] = nil
+			next
+		end
+
 		# jawikiの見出し語にヒットしない表記はコスト値のベースを8000にする
 		# コスト値 = 8000 + (元のコスト値/10)
-		else
+		if s[0] != jawiki[0]
 			s[4] = (8000 + (s[4] / 10)).to_s
 			lines[i] = s.join("	")
+			next
 		end
+
+		# jawikiの見出し語に1回ヒットする表記はコスト値のベースを7000にする
+		# 中居正広	なかいまさひろ	1917	1917	6477
+		# コスト値 = 7000 + (元のコスト値/10)
+		if jawiki[4] == 1
+			s[4] = (7000 + (s[4] / 10)).to_s
+			lines[i] = s.join("	")
+			next
+		end
+
+		# jawikiの見出し語に2回以上ヒットする表記はコスト値のベースを6000にする
+		# コスト値 = 6000 + (元のコスト値/10) - (ヒット数*30)
+		s[4] = (6000 + (s[4] / 10) - (jawiki[4] * 30)).to_s
+		lines[i] = s.join("	")
 	end
 
 	lines = lines.compact

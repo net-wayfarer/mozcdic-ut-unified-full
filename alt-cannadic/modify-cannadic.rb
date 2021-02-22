@@ -84,7 +84,7 @@ end
 # main
 # ==============================================================================
 
-`wget -N https://ja.osdn.net/projects/alt-cannadic/downloads/50881/alt-cannadic-110208.tar.bz2`
+`wget -nc https://ja.osdn.net/projects/alt-cannadic/downloads/50881/alt-cannadic-110208.tar.bz2`
 `rm -rf alt-cannadic-110208`
 `tar xf alt-cannadic-110208.tar.bz2`
 `mv alt-cannadic-110208/{gcanna.ctd,g_fname.ctd} .`
