@@ -7,7 +7,7 @@ require 'nkf'
 # Wikipediaの記事は「タイトル（読み）」が冒頭に書かれていることが多い。
 # これを手がかりに表記と読みのペアを取得する。
 #
-#// 記事の例
+# 記事の例
 #    <title>生物学</title>
 #    <ns>0</ns>
 #    <id>57</id>
@@ -31,7 +31,7 @@ def getYomiHyouki
 	# ==============================================================================
 
 	# タイトルと記事を取得
-	# 「    <title>田中瞳 (アナウンサー)</title>」
+	# "    <title>田中瞳 (アナウンサー)</title>"
 	$article = $article.split("    <title>")[1]
 
 	if $article == nil
@@ -47,8 +47,10 @@ def getYomiHyouki
 
 	# 全角英数を半角に変換してUTF-8で出力
 	# 全角文字の検索はUTF-8に変換した後でないと失敗する
-	# -m0 MIME の解読を一切しない, -Z1 全角空白を ASCII の空白に変換, 
-	# -W 入力に UTF-8 を仮定する, -w UTF-8 を出力する(BOMなし)
+	# -m0 MIME の解読を一切しない
+	# -Z1 全角空白を ASCII の空白に変換
+	# -W 入力に UTF-8 を仮定する
+	# -w UTF-8 を出力する(BOMなし)
 	hyouki = NKF.nkf("-m0Z1 -W -w", title)
 
 	# 「 (曖昧さ回避)」を除外
@@ -61,39 +63,40 @@ def getYomiHyouki
 	# 田中瞳 (アナウンサー)
 	hyouki = hyouki.split(' (')[0]
 
-	# 表記にスペースがある場合は除外。記事のスペースを除去して検索するので読みを取得できない
+	# 表記にスペースがある場合は除外。スペースを除去した記事を検索するので読みを取得できない
 	if hyouki.index(" ") != nil ||
 	# 表記に「、」がある場合は除外。記事の「、」で読みを切るので適切な読みを取得できない
 	hyouki.index("、") != nil
 		return
 	end
 
-	hyouki_tr = hyouki.tr('!?=・。', '')
+	# 読みにならない文字を除外した表記2を作る
+	hyouki2 = hyouki.tr('!?=・。', '')
 
-	# 表記がひらがなとカタカナだけの場合は読みを表記から作る
+	# 表記2がひらがなとカタカナだけの場合は読みを表記2から作る
 	# さいたまスーパーアリーナ
-	if hyouki == hyouki.scan(/[ぁ-ゔァ-ヴー!?=・。]/).join
-		yomi = NKF.nkf("--hiragana -w -W", hyouki_tr)
-
-		# 読みが2文字以下の場合は除外
-		if yomi.length < 3
+	if hyouki2 == hyouki2.scan(/[ぁ-ゔァ-ヴー]/).join
+		# 表記2が2文字以下の場合は読みも2文字以下になるので除外
+		if hyouki2.length < 3
 			return
 		end
 
+		yomi = NKF.nkf("--hiragana -w -W", hyouki2)
 		yomi = yomi.tr("ゐゑ", "いえ")
+
 		$dicfile.puts yomi + "	0	0	6000	" + hyouki
 		return
 	end
 
 	# 表記が25文字を超える場合は候補ウィンドウが見づらいので除外
 	if hyouki.length > 25 ||
-	# 表記_trが1文字の場合は除外
-	hyouki_tr.length < 2 ||
-	# 表記_trが英数字のみの場合は除外
-	hyouki_tr.length == hyouki_tr.bytesize ||
-	# 数字を3個以上含む表記_trは除外
+	# 表記2が1文字の場合は除外
+	hyouki2.length < 2 ||
+	# 表記2が英数字のみの場合は除外
+	hyouki2.length == hyouki2.bytesize ||
+	# 数字を3個以上含む表記2は除外
 	# 「国道120号」などキリがないし、残しても読みが数字になっている（こくどう120ごう）
-	hyouki_tr.scan(/\d/).length > 2
+	hyouki2.scan(/\d/).length > 2
 		return
 	end
 
@@ -125,8 +128,6 @@ def getYomiHyouki
 
 		# 全角英数を半角に変換してUTF-8で出力
 		# 全角文字の検索はUTF-8に変換した後でないと失敗する
-		# -m0 MIME の解読を一切しない, -Z1 全角空白を ASCII の空白に変換, 
-		# -W 入力に UTF-8 を仮定する, -w UTF-8 を出力する(BOMなし)
 		s = NKF.nkf("-m0Z1 -W -w", s)
 
 		# 「(」がない行を除外。「表記(読み」を調べるので
@@ -252,4 +253,3 @@ lines = lines.uniq.sort
 file = File.new(mozcdic, "w")
 		file.puts lines
 file.close
-

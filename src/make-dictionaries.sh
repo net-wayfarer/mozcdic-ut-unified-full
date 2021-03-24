@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20210222"
+UTDICDATE="20210322"
 REVISION="1"
 
 altcannadic="true"
@@ -18,8 +18,9 @@ sudachidict="true"
 # ==============================================================================
 
 rm -f mozcdic-ut.txt
-#rm ../*/*.zip
-#rm ../*/*.gz
+rm -f ../mozcdic-ut-*.txt
+rm ../*/*.zip
+rm ../*/*.gz
 #rm ../*/*.bz2
 
 cd ../mozc/
