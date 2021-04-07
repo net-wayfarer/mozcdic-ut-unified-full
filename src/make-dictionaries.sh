@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20210322"
+UTDICDATE="20210329"
 REVISION="1"
 
 altcannadic="true"
@@ -26,14 +26,14 @@ rm ../*/*.gz
 cd ../mozc/
 sh get-official-mozc.sh
 
-if [ $altcannadic = true ]; then
+if [[ $altcannadic = "true" ]]; then
 cd ../alt-cannadic/
 ruby modify-cannadic.rb
 cat mozcdic-altcanna-jinmei.txt >> ../src/mozcdic-ut.txt
 cat mozcdic-altcanna.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $edict = true ]; then
+if [[ $edict = "true" ]]; then
 cd ../edict/
 ruby modify-edict2.rb
 cat mozcdic-edict2.txt >> ../src/mozcdic-ut.txt
@@ -42,39 +42,39 @@ fi
 cd ../jawiki-all-titles/
 ruby count-jawiki-titles.rb
 
-if [ $jawikiarticles = true ]; then
+if [[ $jawikiarticles = "true" ]]; then
 cd ../jawiki-articles/
 ruby convert-jawiki-to-mozc.rb
 ruby ../src/filter-entries.rb mozcdic-jawiki.txt
 cat mozcdic-jawiki.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $jinmeiut = true ]; then
+if [[ $jinmeiut = "true" ]]; then
 cd ../jinmei-ut/
 ruby modify-jinmei-ut.rb
 cat mozcdic-jinmei-ut.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $neologd = true ]; then
+if [[ $neologd = "true" ]]; then
 cd ../neologd/
 ruby convert-neologd-to-mozc.rb
 ruby ../src/filter-entries.rb mozcdic-neologd.txt
 cat mozcdic-neologd.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $nicoime = true ]; then
+if [[ $nicoime = "true" ]]; then
 cd ../nicoime/
 ruby modify-nicoime.rb
 cat mozcdic-nicoime.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $skk = true ]; then
+if [[ $skk = "true" ]]; then
 cd ../skk/
 ruby modify-skkdic.rb
 cat mozcdic-skkdic.txt >> ../src/mozcdic-ut.txt
 fi
 
-if [ $sudachidict = true ]; then
+if [[ $sudachidict = "true" ]]; then
 cd ../sudachidict/
 ruby convert-sudachiduct-to-mozc.rb
 ruby ../src/filter-entries.rb mozcdic-sudachidict-*.txt

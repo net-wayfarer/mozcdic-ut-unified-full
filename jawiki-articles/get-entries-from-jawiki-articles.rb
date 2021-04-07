@@ -1,13 +1,13 @@
 #!/usr/bin/ruby
 # -*- coding:utf-8 -*-
 
+require 'parallel'
 require 'bzip2/ffi'
 require 'nkf'
 
 # Wikipediaの記事は「タイトル（読み）」が冒頭に書かれていることが多い。
 # これを手がかりに表記と読みのペアを取得する。
 #
-# 記事の例
 #    <title>生物学</title>
 #    <ns>0</ns>
 #    <id>57</id>
@@ -24,21 +24,16 @@ require 'nkf'
 #}}
 #'''生物学'''（せいぶつがく、{{Lang-en-short|biology}}）とは、
 
-
 def getYomiHyouki
+
 	# ==============================================================================
 	# タイトルから表記を作る
 	# ==============================================================================
 
 	# タイトルと記事を取得
-	# "    <title>田中瞳 (アナウンサー)</title>"
-	$article = $article.split("    <title>")[1]
-
-	if $article == nil
-		return
-	end
-
 	title = $article.split("</title>")[0]
+	title = title.split("<title>")[1]
+
 	$article = $article.split(' xml:space="preserve">')[1]
 
 	if $article == nil
@@ -46,57 +41,68 @@ def getYomiHyouki
 	end
 
 	# 全角英数を半角に変換してUTF-8で出力
-	# 全角文字の検索はUTF-8に変換した後でないと失敗する
+	# UTF-8に変換しないと全角文字の検索時にCompatibilityErrorが出る
 	# -m0 MIME の解読を一切しない
 	# -Z1 全角空白を ASCII の空白に変換
 	# -W 入力に UTF-8 を仮定する
 	# -w UTF-8 を出力する(BOMなし)
 	hyouki = NKF.nkf("-m0Z1 -W -w", title)
 
-	# 「 (曖昧さ回避)」を除外
-	# 法皇 (曖昧さ回避)
-	if  hyouki.index(" (曖昧さ回避)") != nil
-		return
-	end
-
 	# 「 (」の前を表記にする
 	# 田中瞳 (アナウンサー)
 	hyouki = hyouki.split(' (')[0]
 
-	# 表記にスペースがある場合は除外。スペースを除去した記事を検索するので読みを取得できない
-	if hyouki.index(" ") != nil ||
-	# 表記に「、」がある場合は除外。記事の「、」で読みを切るので適切な読みを取得できない
+	# 表記が英数字のみの場合はスキップ
+	if hyouki.length == hyouki.bytesize ||
+	# 表記が26文字以上の場合はスキップ。候補ウィンドウが大きくなりすぎる
+	hyouki[25] != nil ||
+	# 内部用のページをスキップ
+	hyouki.index("(曖昧さ回避)") != nil ||
+	hyouki.index("Wikipedia:") != nil ||
+	hyouki.index("ファイル:") != nil ||
+	hyouki.index("Portal:") != nil ||
+	hyouki.index("Help:") != nil ||
+	hyouki.index("Template:") != nil ||
+	hyouki.index("Category:") != nil ||
+	hyouki.index("プロジェクト:") != nil ||
+	# 表記にスペースがある場合はスキップ
+	# あとで記事のスペースを削除するので、残してもマッチしない
+	# '''皆藤 愛子'''<ref>一部のプロフィールが</ref>(かいとう あいこ、[[1984年]]
+	hyouki.index(" ") != nil ||
+	# 表記に「、」がある場合はスキップ
+	# 記事の「、」で読みを切るので、残してもマッチしない
 	hyouki.index("、") != nil
 		return
 	end
 
-	# 読みにならない文字を除外した表記2を作る
-	hyouki2 = hyouki.tr('!?=・。', '')
+	# 読みにならない文字を削除したhyouki_stripを作る
+	hyouki_strip = hyouki.tr('!?=:・。', '')
 
-	# 表記2がひらがなとカタカナだけの場合は読みを表記2から作る
-	# さいたまスーパーアリーナ
-	if hyouki2 == hyouki2.scan(/[ぁ-ゔァ-ヴー]/).join
-		# 表記2が2文字以下の場合は読みも2文字以下になるので除外
-		if hyouki2.length < 3
-			return
-		end
-
-		yomi = NKF.nkf("--hiragana -w -W", hyouki2)
-		yomi = yomi.tr("ゐゑ", "いえ")
-
-		$dicfile.puts yomi + "	0	0	6000	" + hyouki
+	# hyouki_stripが1文字の場合はスキップ
+	if hyouki_strip[1] == nil ||
+	# hyouki_stripが英数字のみの場合はスキップ
+	hyouki_strip.length == hyouki_strip.bytesize ||
+	# hyouki_stripが数字を3個以上含む場合はスキップ
+	# 国道120号, 3月26日
+	hyouki_strip.scan(/\d/)[2] != nil
 		return
 	end
 
-	# 表記が25文字を超える場合は候補ウィンドウが見づらいので除外
-	if hyouki.length > 25 ||
-	# 表記2が1文字の場合は除外
-	hyouki2.length < 2 ||
-	# 表記2が英数字のみの場合は除外
-	hyouki2.length == hyouki2.bytesize ||
-	# 数字を3個以上含む表記2は除外
-	# 「国道120号」などキリがないし、残しても読みが数字になっている（こくどう120ごう）
-	hyouki2.scan(/\d/).length > 2
+	# hyouki_stripがひらがなとカタカナだけの場合は、読みをhyouki_stripから作る
+	# さいたまスーパーアリーナ
+	if hyouki_strip == hyouki_strip.scan(/[ぁ-ゔァ-ヴー]/).join
+		# hyouki_stripが2文字以下の場合は読みも2文字以下になるのでスキップ
+		if hyouki_strip[2] == nil
+			return
+		end
+
+		yomi = NKF.nkf("--hiragana -w -W", hyouki_strip)
+		yomi = yomi.tr("ゐゑ", "いえ")
+
+		# 他のプロセスによる書き込みをロック
+		$dicfile.flock(File::LOCK_EX)
+		$dicfile.puts yomi + "	0	0	6000	" + hyouki
+		$dicfile.flock(File::LOCK_UN)
 		return
 	end
 
@@ -104,19 +110,22 @@ def getYomiHyouki
 	# 記事を必要な部分に絞る
 	# ==============================================================================
 
-	# テンプレートを除去
-	if $article[0..1] == "{{"
-		# 連続したテンプレートを1つにまとめる
-		$article = $article.gsub("}}\n{{", "")
-		# テンプレートを除去
-		$article = $article.split("}}")[1..-1].join("}}")
+	lines = $article
+
+	# 冒頭のテンプレート「{{ }}」を削除
+	# 正規表現で削除すると、本文中に「}}」がある場合に最長一致で本文が消える
+	if lines[0..1] == "{{"
+		# 冒頭の連続したテンプレートを1つにまとめる
+		lines = lines.gsub("}}\n{{", "")
+		# 冒頭のテンプレートを削除
+		lines = lines.split("}}")[1..-1].join("}}")
 	end
 
-	lines = $article.split("\n")
+	lines = lines.split("\n")
 
 	# 記事を最大200行にする
-	if lines.length > 200
-		lines = lines[0..200]
+	if lines[200] != nil
+		lines = lines[0..199]
 	end
 
 	# ==============================================================================
@@ -127,21 +136,11 @@ def getYomiHyouki
 		s = lines[i]
 
 		# 全角英数を半角に変換してUTF-8で出力
-		# 全角文字の検索はUTF-8に変換した後でないと失敗する
+		# UTF-8に変換しないと全角文字の検索時にCompatibilityErrorが出る
 		s = NKF.nkf("-m0Z1 -W -w", s)
 
-		# 「(」がない行を除外。「表記(読み」を調べるので
-		if s.index("(") == nil
-			next
-		end
-
-		# otheruseslist, Otheruseslist を除外
-		# {{otheruseslist|[[ビートルズ]]の[[楽曲]]|[[英単語]]の意味|昨日
-		if s.index("theruseslist") != nil
-			next
-		end
-
-		# 「<ref 」から「</ref>」までを除去
+		# 「<ref 」から「</ref>」までを削除
+		# 正規表現で削除すると、「</ref>」が2個以上ある場合に最長一致で読みが消える
 		# '''皆藤 愛子'''<ref>一部のプロフィールが</ref>(かいとう あいこ、[[1984年]]
 		# '''大倉 忠義'''（おおくら ただよし<ref name="oricon"></ref>、[[1985年]]
 		s1 = s.split("&lt;ref")[0]
@@ -151,7 +150,7 @@ def getYomiHyouki
 			s = s1 + s2
 		end
 
-		# スペースと「'"「」『』」を取る
+		# スペースと「'"「」『』」を削除
 		# '''皆藤 愛子'''(かいとう あいこ、[[1984年]]
 		s = s.tr(" '\"「」『』", "")
 
@@ -184,17 +183,17 @@ def getYomiHyouki
 			next
 		end
 
-		# 読みの不要な部分を除去
+		# 読みの不要な部分を削除
 		yomi = yomi.tr('!?=・。', '')
 
-		# 読みが2文字以下の場合は除外
-		if yomi.length < 3 ||
-		# 読みの文字数が表記の3倍を超える場合は除外
+		# 読みが2文字以下の場合はスキップ
+		if yomi[2] == nil ||
+		# 読みの文字数が表記の3倍を超える場合はスキップ
 		yomi.length > hyouki.length * 3 ||
-		# 読みが全てカタカナの場合は除外
+		# 読みが全てカタカナの場合はスキップ
 		# ミュージシャン一覧(グループ)
 		yomi == yomi.scan(/[ァ-ヴー]/).join ||
-		# 読みが「ー」で始まる場合は除外
+		# 読みが「ー」で始まる場合はスキップ
 		yomi[0] == "ー"
 			next
 		end
@@ -203,12 +202,18 @@ def getYomiHyouki
 		yomi = NKF.nkf("--hiragana -w -W", yomi)
 		yomi = yomi.tr("ゐゑ", "いえ")
 
-		# 読みにひらがな以外のものがあれば除外
+		# 読みにひらがな以外のものがある場合はスキップ
 		if yomi != yomi.scan(/[ぁ-ゔー]/).join
 			next
 		end
 
+		# 表記の記号を変換
+		hyouki = hyouki.gsub('&amp;', '&')
+		hyouki = hyouki.gsub('&quot;', '"')
+
+		$dicfile.flock(File::LOCK_EX)
 		$dicfile.puts yomi + "	0	0	6000	" + hyouki
+		$dicfile.flock(File::LOCK_UN)
 		return
 	end
 end
@@ -224,16 +229,21 @@ mozcdic = "jawiki-ut.txt"
 
 reader = Bzip2::FFI::Reader.open(jawiki)
 $dicfile = File.new(mozcdic, "w")
+article_part = ""
 
 puts "Reading..."
 
 while articles = reader.read(500000000)
 	articles = articles.split("  </page>")
+	articles[0] = article_part + articles[0]
+
+	# 途中で切れた記事をキープ
+	article_part = articles[-1]
 
 	puts "Writing..."
 
-	articles.length.times do |i|
-		$article = articles[i]
+	Parallel.map(articles, in_processes: 3) do |s|
+		$article = s
 		getYomiHyouki
 	end
 
@@ -243,7 +253,7 @@ end
 reader.close
 $dicfile.close
 
-# 重複エントリを除去
+# 重複エントリを削除
 file = File.new(mozcdic, "r")
 		lines = file.read.split("\n")
 file.close

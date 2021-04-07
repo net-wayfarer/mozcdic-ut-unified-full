@@ -2,6 +2,13 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-03-29
+- update get-entries-from-jawiki-articles.rb.
+  parallelによる処理を追加。
+
+- update fcitx5/fcitx patches.
+- update jinmei-ut.
+
 2021-03-22
 - update jawiki-articles (20210320).
 - update jinmei-ut.
