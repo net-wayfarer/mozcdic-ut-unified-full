@@ -2,6 +2,10 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-04-21
+- update jawiki-articles (20210420).
+- update jinmei-ut.
+
 2021-03-29
 - update get-entries-from-jawiki-articles.rb.
   parallelによる処理を追加。
