@@ -5,24 +5,29 @@ require 'parallel'
 require 'bzip2/ffi'
 require 'nkf'
 
-# Wikipediaの記事は「タイトル（読み）」が冒頭に書かれていることが多い。
-# これを手がかりに表記と読みのペアを取得する。
+# Wikipediaの記事は「タイトル（読み）」が冒頭に書かれていることが多い
+# これを手がかりに表記と読みのペアを取得する
 #
 #    <title>生物学</title>
 #    <ns>0</ns>
 #    <id>57</id>
 #    <revision>
-#      <id>74846611</id>
-#      <parentid>74844066</parentid>
-#      <timestamp>2019-11-01T10:51:10Z</timestamp>
+#      <id>81180990</id>
+#      <parentid>79962619</parentid>
+#      <timestamp>2021-01-04T11:40:47Z</timestamp>
 #      <contributor>
-#        <ip></ip>
+#        <username>MathXplore</username>
+#        <id>1247297</id>
 #      </contributor>
+#      <minor />
+#      <comment>/* 関連項目 */</comment>
 #      <model>wikitext</model>
 #      <format>text/x-wiki</format>
-#      <text bytes="39498" xml:space="preserve">{{複数の問題
+#      <text bytes="39506" xml:space="preserve">{{複数の問題
+#| 出典の明記 = 2018年11月12日 (月) 08:46 (UTC)
+#| 参照方法 = 2018年11月12日 (月) 08:46 (UTC)
 #}}
-#'''生物学'''（せいぶつがく、{{Lang-en-short|biology}}）とは、
+#'''生物学'''（せいぶつがく、{{Lang-en-short|biology}}、
 
 def getYomiHyouki
 
@@ -66,7 +71,7 @@ def getYomiHyouki
 	hyouki.index("Category:") != nil ||
 	hyouki.index("プロジェクト:") != nil ||
 	# 表記にスペースがある場合はスキップ
-	# あとで記事のスペースを削除するので、残してもマッチしない
+	# 読みを検索する前に記事のスペースを削除するので、残してもマッチしない
 	# '''皆藤 愛子'''<ref>一部のプロフィールが</ref>(かいとう あいこ、[[1984年]]
 	hyouki.index(" ") != nil ||
 	# 表記に「、」がある場合はスキップ
@@ -75,28 +80,28 @@ def getYomiHyouki
 		return
 	end
 
-	# 読みにならない文字を削除したhyouki_stripを作る
-	hyouki_strip = hyouki.tr('!?=:・。', '')
+	# 句読点など読みにならない文字を削除したhyouki4yomiを作る
+	hyouki4yomi = hyouki.tr('!?=:・。', '')
 
-	# hyouki_stripが1文字の場合はスキップ
-	if hyouki_strip[1] == nil ||
-	# hyouki_stripが英数字のみの場合はスキップ
-	hyouki_strip.length == hyouki_strip.bytesize ||
-	# hyouki_stripが数字を3個以上含む場合はスキップ
+	# hyouki4yomiが1文字の場合はスキップ
+	if hyouki4yomi[1] == nil ||
+	# hyouki4yomiが英数字のみの場合はスキップ
+	hyouki4yomi.length == hyouki4yomi.bytesize ||
+	# hyouki4yomiが数字を3個以上含む場合はスキップ
 	# 国道120号, 3月26日
-	hyouki_strip.scan(/\d/)[2] != nil
+	hyouki4yomi.scan(/\d/)[2] != nil
 		return
 	end
 
-	# hyouki_stripがひらがなとカタカナだけの場合は、読みをhyouki_stripから作る
+	# hyouki4yomiがひらがなとカタカナだけの場合は、読みをhyouki4yomiから作る
 	# さいたまスーパーアリーナ
-	if hyouki_strip == hyouki_strip.scan(/[ぁ-ゔァ-ヴー]/).join
-		# hyouki_stripが2文字以下の場合は読みも2文字以下になるのでスキップ
-		if hyouki_strip[2] == nil
+	if hyouki4yomi == hyouki4yomi.scan(/[ぁ-ゔァ-ヴー]/).join
+		# hyouki4yomiが2文字以下の場合は読みも2文字以下になるのでスキップ
+		if hyouki4yomi[2] == nil
 			return
 		end
 
-		yomi = NKF.nkf("--hiragana -w -W", hyouki_strip)
+		yomi = NKF.nkf("--hiragana -w -W", hyouki4yomi)
 		yomi = yomi.tr("ゐゑ", "いえ")
 
 		# 他のプロセスによる書き込みをロック
@@ -113,7 +118,6 @@ def getYomiHyouki
 	lines = $article
 
 	# 冒頭のテンプレート「{{ }}」を削除
-	# 正規表現で削除すると、本文中に「}}」がある場合に最長一致で本文が消える
 	if lines[0..1] == "{{"
 		# 冒頭の連続したテンプレートを1つにまとめる
 		lines = lines.gsub("}}\n{{", "")
@@ -140,14 +144,10 @@ def getYomiHyouki
 		s = NKF.nkf("-m0Z1 -W -w", s)
 
 		# 「<ref 」から「</ref>」までを削除
-		# 正規表現で削除すると、「</ref>」が2個以上ある場合に最長一致で読みが消える
 		# '''皆藤 愛子'''<ref>一部のプロフィールが</ref>(かいとう あいこ、[[1984年]]
 		# '''大倉 忠義'''（おおくら ただよし<ref name="oricon"></ref>、[[1985年]]
-		s1 = s.split("&lt;ref")[0]
-		s2 = s.split("&lt;/ref&gt;")[1]
-
-		if s1 != nil && s2 != nil
-			s = s1 + s2
+		if s.index("&lt;ref") != nil
+			s = s.sub(/&lt;ref.*?&lt;\/ref&gt;/, "")
 		end
 
 		# スペースと「'"「」『』」を削除
@@ -229,6 +229,7 @@ mozcdic = "jawiki-ut.txt"
 
 reader = Bzip2::FFI::Reader.open(jawiki)
 $dicfile = File.new(mozcdic, "w")
+core_num = `grep cpu.cores /proc/cpuinfo`.chomp.split(": ")[-1].to_i - 1
 article_part = ""
 
 puts "Reading..."
@@ -242,7 +243,7 @@ while articles = reader.read(500000000)
 
 	puts "Writing..."
 
-	Parallel.map(articles, in_processes: 3) do |s|
+	Parallel.map(articles, in_processes: core_num) do |s|
 		$article = s
 		getYomiHyouki
 	end

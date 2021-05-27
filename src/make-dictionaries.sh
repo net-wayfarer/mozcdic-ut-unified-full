@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20210421"
+UTDICDATE="20210524"
 REVISION="1"
 
 altcannadic="true"
@@ -21,7 +21,6 @@ rm -f mozcdic-ut.txt
 rm -f ../mozcdic-ut-*.txt
 rm ../*/*.zip
 rm ../*/*.gz
-#rm ../*/*.bz2
 
 cd ../mozc/
 sh get-official-mozc.sh
@@ -44,7 +43,7 @@ ruby count-jawiki-titles.rb
 
 if [[ $jawikiarticles = "true" ]]; then
 cd ../jawiki-articles/
-ruby convert-jawiki-to-mozc.rb
+ruby convert-jawiki-ut-to-mozc.rb
 ruby ../src/filter-entries.rb mozcdic-jawiki.txt
 cat mozcdic-jawiki.txt >> ../src/mozcdic-ut.txt
 fi

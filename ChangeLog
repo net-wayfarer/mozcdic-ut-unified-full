@@ -2,6 +2,20 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-05-24
+- update get-entries-from-jawiki-articles.rb.
+  parallelのプロセス数を「物理コア数 - 1」にした。
+  その他調整。
+
+- update fcitx5-mozc-icons for simple installation.
+  cp -r ${srcdir}/fcitx5-mozc-icons-${_iconver}/* ${pkgdir}/usr/share/icons/
+
+- remove gtk2 from makedepends in PKGBUILD.
+  add "enable_gtk_renderer==0" to PKGBUILD.
+
+- update jawiki-articles (20210520).
+- update jinmei-ut.
+
 2021-04-21
 - update jawiki-articles (20210420).
 - update jinmei-ut.

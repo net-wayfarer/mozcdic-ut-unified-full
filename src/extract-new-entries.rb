@@ -7,7 +7,6 @@
 # ==============================================================================
 
 def extract_new_entries
-
 	file = File.new("../mozc/mozcdic.txt", "r")
 		mozcdic = file.read.split("\n")
 	file.close
