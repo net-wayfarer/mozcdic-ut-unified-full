@@ -1,7 +1,6 @@
 #!/bin/bash
 
-UTDICDATE="20210524"
-REVISION="1"
+UTDICDATE="20210603"
 
 altcannadic="true"
 edict="true"
@@ -96,7 +95,7 @@ ruby extract-new-entries.rb mozcdic-ut.txt
 ruby apply-jawiki-costs.rb mozcdic-ut.txt.extracted
 
 rm -f ../mozcdic*-ut-*.txt
-mv mozcdic-ut.txt.extracted ../mozcdic-ut-$UTDICDATE.$REVISION.txt
+mv mozcdic-ut.txt.extracted ../mozcdic-ut-$UTDICDATE.txt
 
 
 # ==============================================================================
@@ -104,9 +103,8 @@ mv mozcdic-ut.txt.extracted ../mozcdic-ut-$UTDICDATE.$REVISION.txt
 # ==============================================================================
 
 cd ../../
-rm -rf mozcdic-ut-$UTDICDATE.$REVISION
-rsync -av mozcdic-ut-dev/* mozcdic-ut-$UTDICDATE.$REVISION --exclude=id.def \
+rm -rf mozcdic-ut-$UTDICDATE
+rsync -av mozcdic-ut-dev/* mozcdic-ut-$UTDICDATE --exclude=id.def \
 --exclude=jawiki-latest* --exclude=jawiki-ut.txt --exclude=KEN_ALL.* --exclude=*.csv \
 --exclude=*.xml --exclude=*.gz --exclude=*.bz2 --exclude=*.xz --exclude=*.zip
-rm -f mozcdic-ut-$UTDICDATE.$REVISION/*/mozcdic*.txt*
-
+rm -f mozcdic-ut-$UTDICDATE/*/mozcdic*.txt*

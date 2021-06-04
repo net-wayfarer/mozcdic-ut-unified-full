@@ -2,6 +2,13 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-06-03
+- パッケージのバージョン名を「$UTDICDATE.$REVISION」から「$UTDICDATE」のみに変更。
+  改訂版を出す場合は「UTDICDATE="20210524.1"」のようにする。
+- update abseil-cpp in PKGBUILD.
+- update jawiki-articles (20210601).
+- update jinmei-ut.
+
 2021-05-24
 - update get-entries-from-jawiki-articles.rb.
   parallelのプロセス数を「物理コア数 - 1」にした。
