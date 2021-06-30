@@ -48,7 +48,7 @@ def convert_neologd_to_mozc
 		hyouki.length < 2 ||
 		# 表記が20文字を超える場合は除外
 		hyouki.length > 20 ||
-		# 数字を2個以上含む表記を除外 (11万弱のエントリが除外される)
+		# 数字を2個以上含む表記を除外
 		# 「712円」「第1231話」などキリがない
 		hyouki.scan(/\d/).length > 1
 			next

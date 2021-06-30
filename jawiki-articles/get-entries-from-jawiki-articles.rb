@@ -46,7 +46,6 @@ def getYomiHyouki
 	end
 
 	# 全角英数を半角に変換してUTF-8で出力
-	# UTF-8に変換しないと全角文字の検索時にCompatibilityErrorが出る
 	# -m0 MIME の解読を一切しない
 	# -Z1 全角空白を ASCII の空白に変換
 	# -W 入力に UTF-8 を仮定する
@@ -80,28 +79,28 @@ def getYomiHyouki
 		return
 	end
 
-	# 句読点など読みにならない文字を削除したhyouki4yomiを作る
-	hyouki4yomi = hyouki.tr('!?=:・。', '')
+	# 句読点など読みにならない文字を削除したhyouki2を作る
+	hyouki2 = hyouki.tr('!?=:・。', '')
 
-	# hyouki4yomiが1文字の場合はスキップ
-	if hyouki4yomi[1] == nil ||
-	# hyouki4yomiが英数字のみの場合はスキップ
-	hyouki4yomi.length == hyouki4yomi.bytesize ||
-	# hyouki4yomiが数字を3個以上含む場合はスキップ
+	# hyouki2が1文字の場合はスキップ
+	if hyouki2[1] == nil ||
+	# hyouki2が英数字のみの場合はスキップ
+	hyouki2.length == hyouki2.bytesize ||
+	# hyouki2が数字を3個以上含む場合はスキップ
 	# 国道120号, 3月26日
-	hyouki4yomi.scan(/\d/)[2] != nil
+	hyouki2.scan(/\d/)[2] != nil
 		return
 	end
 
-	# hyouki4yomiがひらがなとカタカナだけの場合は、読みをhyouki4yomiから作る
+	# hyouki2がひらがなとカタカナだけの場合は、読みをhyouki2から作る
 	# さいたまスーパーアリーナ
-	if hyouki4yomi == hyouki4yomi.scan(/[ぁ-ゔァ-ヴー]/).join
-		# hyouki4yomiが2文字以下の場合は読みも2文字以下になるのでスキップ
-		if hyouki4yomi[2] == nil
+	if hyouki2 == hyouki2.scan(/[ぁ-ゔァ-ヴー]/).join
+		# hyouki2が2文字以下の場合は読みも2文字以下になるのでスキップ
+		if hyouki2[2] == nil
 			return
 		end
 
-		yomi = NKF.nkf("--hiragana -w -W", hyouki4yomi)
+		yomi = NKF.nkf("--hiragana -w -W", hyouki2)
 		yomi = yomi.tr("ゐゑ", "いえ")
 
 		# 他のプロセスによる書き込みをロック
@@ -140,7 +139,6 @@ def getYomiHyouki
 		s = lines[i]
 
 		# 全角英数を半角に変換してUTF-8で出力
-		# UTF-8に変換しないと全角文字の検索時にCompatibilityErrorが出る
 		s = NKF.nkf("-m0Z1 -W -w", s)
 
 		# 「<ref 」から「</ref>」までを削除

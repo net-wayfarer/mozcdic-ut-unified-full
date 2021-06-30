@@ -2,6 +2,11 @@
 # mozcdic-ut
 # ==============================================================================
 
+2021-06-27
+- update fcitx5-mozc-*.patch.
+- update jawiki-articles (20210620).
+- update jinmei-ut.
+
 2021-06-03
 - パッケージのバージョン名を「$UTDICDATE.$REVISION」から「$UTDICDATE」のみに変更。
   改訂版を出す場合は「UTDICDATE="20210524.1"」のようにする。
@@ -14,7 +19,7 @@
   parallelのプロセス数を「物理コア数 - 1」にした。
   その他調整。
 
-- update fcitx5-mozc-icons for simple installation.
+- update fcitx5-mozc-icons to simplify installation.
   cp -r ${srcdir}/fcitx5-mozc-icons-${_iconver}/* ${pkgdir}/usr/share/icons/
 
 - remove gtk2 from makedepends in PKGBUILD.

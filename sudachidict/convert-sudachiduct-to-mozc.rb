@@ -60,7 +60,7 @@ def convert_sudachidict_to_mozc
 		# 読みにカタカナ以外のものがあれば除外
 		yomi != yomi.scan(/[ァ-ヴー]/).join ||
 		yomi.index('ヶ') != nil ||
-		# 会社を除外 (15万弱のエントリが除外される)
+		# 会社を除外
 		hyouki.index("合資会社") != nil ||
 		hyouki.index("事務所") != nil ||
 		hyouki.index("コーポレーション") != nil ||
