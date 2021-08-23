@@ -37,3 +37,7 @@ cd mozc-ut-unified-full
 makepkg
 sudo pacman -U *.pkg.tar.xz
 ```
+
+# Acknowledgements
+
+`make-dictionaries.bash` was contributed by [tuxsavvy](https://aur.archlinux.org/packages/fcitx-mozc-ut-unified-full).
